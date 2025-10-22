@@ -1,10 +1,13 @@
 const express = require("express");
 const fs = require("fs");
 const app = express();
-const PORT = 8080;
-app.use(express.json()); 
+const PORT = 3000;
+
+app.use(express.json()); // for parsing JSON request bodies
 
 const FILE_PATH = "./books.json";
+
+// Helper function to read file
 function readBooks() {
   try {
     const data = fs.readFileSync(FILE_PATH, "utf8");
@@ -14,6 +17,8 @@ function readBooks() {
     return [];
   }
 }
+
+// Helper function to write file
 function writeBooks(books) {
   try {
     fs.writeFileSync(FILE_PATH, JSON.stringify(books, null, 2));
@@ -21,15 +26,21 @@ function writeBooks(books) {
     console.error("Error writing books.json:", err);
   }
 }
+
+// GET /books - return all books
 app.get("/books", (req, res) => {
   const books = readBooks();
   res.json(books);
 });
+
+// GET /books/available - return only available books
 app.get("/books/available", (req, res) => {
   const books = readBooks();
   const availableBooks = books.filter(b => b.available === true);
   res.json(availableBooks);
 });
+
+// POST /books - add a new book
 app.post("/books", (req, res) => {
   const books = readBooks();
   const { title, author, available } = req.body;
@@ -49,6 +60,8 @@ app.post("/books", (req, res) => {
   writeBooks(books);
   res.status(201).json(newBook);
 });
+
+// PUT /books/:id - update a book
 app.put("/books/:id", (req, res) => {
   const books = readBooks();
   const bookId = parseInt(req.params.id);
@@ -67,6 +80,8 @@ app.put("/books/:id", (req, res) => {
   writeBooks(books);
   res.json(books[bookIndex]);
 });
+
+// DELETE /books/:id - delete a book
 app.delete("/books/:id", (req, res) => {
   const books = readBooks();
   const bookId = parseInt(req.params.id);
@@ -80,8 +95,7 @@ app.delete("/books/:id", (req, res) => {
   res.json({ message: "Book deleted successfully" });
 });
 
-
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${8080}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
-
